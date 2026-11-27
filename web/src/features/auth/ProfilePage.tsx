@@ -10,6 +10,27 @@ import type { AuthUser } from '../../lib/api/schemas'
 import { describeError } from '../../lib/errors'
 import { useAuth } from './auth'
 
+function validateUsername(value: string): string | undefined {
+  if (value === '') return 'Username wajib diisi.'
+  const hasSpace = /\s/.test(value)
+  const hasUpper = value !== value.toLowerCase() || /[A-Z]/.test(value)
+  if (hasSpace && hasUpper) {
+    return 'Username tidak boleh mengandung huruf kapital (Caps Lock) atau spasi.'
+  }
+  if (hasSpace) return 'Username tidak boleh mengandung spasi.'
+  if (hasUpper) return 'Username tidak boleh mengandung huruf kapital (Caps Lock).'
+  if (value.length < 3) return 'Username minimal 3 karakter.'
+  if (value.length > 100) return 'Username maksimal 100 karakter.'
+  return undefined
+}
+
+function liveFormatError(value: string): string | undefined {
+  if (/\s/.test(value) || value !== value.toLowerCase() || /[A-Z]/.test(value)) {
+    return validateUsername(value)
+  }
+  return undefined
+}
+
 function ProfileForm({
   user,
   onSave,
@@ -24,30 +45,22 @@ function ProfileForm({
   const [formError, setFormError] = useState<string | undefined>()
   const [saving, setSaving] = useState(false)
 
-  const trimmed = name.trim()
-  const unchanged = trimmed === user.name.trim()
+  const unchanged = name === user.name
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setFieldError(undefined)
     setFormError(undefined)
 
-    if (trimmed === '') {
-      setFieldError('Username wajib diisi.')
-      return
-    }
-    if (trimmed.length < 3) {
-      setFieldError('Username minimal 3 karakter.')
-      return
-    }
-    if (trimmed.length > 100) {
-      setFieldError('Username maksimal 100 karakter.')
+    const validationError = validateUsername(name)
+    if (validationError) {
+      setFieldError(validationError)
       return
     }
 
     setSaving(true)
     try {
-      await onSave({ name: trimmed })
+      await onSave({ name })
       toast.success('Username profil berhasil diperbarui.')
     } catch (err: unknown) {
       if (err instanceof ApiError) {
@@ -82,13 +95,17 @@ function ProfileForm({
           minLength={3}
           maxLength={100}
           autoComplete="username"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           value={name}
           onChange={(e) => {
-            setName(e.target.value)
-            if (fieldError) setFieldError(undefined)
+            const next = e.target.value
+            setName(next)
+            setFieldError(liveFormatError(next))
           }}
           error={fieldError}
-          hint="Minimal 3 karakter. Ditampilkan di menu pengguna dan halaman kerja."
+          hint="Minimal 3 karakter, huruf kecil semua dan tanpa spasi (contoh: nabilkencana20)."
         />
 
         {formError ? (

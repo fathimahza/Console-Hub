@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\TrimStrings;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings;
@@ -27,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(RequestId::class);
+        TrimStrings::skipWhen(fn (Request $request): bool => $request->is('api/v1/auth/profile'));
         $middleware->alias(['perm' => RequirePermission::class, 'active' => EnsureActiveUser::class]);
         // Check the permission before route model binding, so a missing record never leaks past a 403.
         $middleware->prependToPriorityList(SubstituteBindings::class, RequirePermission::class);

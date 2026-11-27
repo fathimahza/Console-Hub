@@ -212,7 +212,7 @@ class AuthController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
-        $newName = trim((string) $request->validated('name'));
+        $newName = (string) $request->validated('name');
         $oldName = $user->name;
 
         if ($newName !== $oldName) {

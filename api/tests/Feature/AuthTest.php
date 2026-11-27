@@ -102,11 +102,11 @@ it('echoes or creates an X-Request-Id on every response', function () {
 });
 
 it('allows an authenticated active user to update their username via profile endpoint and records audit', function () {
-    $user = User::factory()->create(['name' => 'Budi Lama']);
+    $user = User::factory()->create(['name' => 'budi_lama']);
     $token = $user->createToken('t')->plainTextToken;
 
     $response = $this->withToken($token)->patchJson('/api/v1/auth/profile', [
-        'name' => '  nabilkencana20  ',
+        'name' => 'nabilkencana20',
         'email' => 'hacker@example.com',
         'is_active' => false,
     ]);
@@ -123,39 +123,50 @@ it('allows an authenticated active user to update their username via profile end
         ->and($user->is_active)->toBeTrue();
 
     $audit = AuditEvent::query()->where('action', 'auth.profile_updated')->where('user_id', $user->id)->sole();
-    expect($audit->old_value)->toBe(['name' => 'Budi Lama'])
+    expect($audit->old_value)->toBe(['name' => 'budi_lama'])
         ->and($audit->new_value)->toBe(['name' => 'nabilkencana20']);
 });
 
 it('does not record redundant audit when submitted username is unchanged', function () {
-    $user = User::factory()->create(['name' => 'Sama Saja']);
+    $user = User::factory()->create(['name' => 'sama_saja']);
     $token = $user->createToken('t')->plainTextToken;
 
-    $this->withToken($token)->patchJson('/api/v1/auth/profile', ['name' => 'Sama Saja'])
+    $this->withToken($token)->patchJson('/api/v1/auth/profile', ['name' => 'sama_saja'])
         ->assertOk()
-        ->assertJsonPath('data.name', 'Sama Saja');
+        ->assertJsonPath('data.name', 'sama_saja');
 
     expect(AuditEvent::query()->where('action', 'auth.profile_updated')->count())->toBe(0);
 });
 
-it('validates username length and refuses unauthenticated or inactive users on profile update', function () {
-    assertApiError($this->patchJson('/api/v1/auth/profile', ['name' => 'Baru']), 401, 'UNAUTHENTICATED');
+it('validates username rules (no uppercase, no spaces, length) and refuses unauthenticated users on profile update', function () {
+    assertApiError($this->patchJson('/api/v1/auth/profile', ['name' => 'baru20']), 401, 'UNAUTHENTICATED');
 
-    $user = User::factory()->create(['name' => 'Budi Awal']);
+    $user = User::factory()->create(['name' => 'budi_awal']);
     $token = $user->createToken('t')->plainTextToken;
 
-    $short = $this->withToken($token)->patchJson('/api/v1/auth/profile', ['name' => '  ab  ']);
+    $short = $this->withToken($token)->patchJson('/api/v1/auth/profile', ['name' => 'ab']);
     assertApiError($short, 422, 'VALIDATION_ERROR');
     $short->assertJsonStructure(['error' => ['details' => ['fields' => ['name']]]]);
 
     $blank = $this->withToken($token)->patchJson('/api/v1/auth/profile', ['name' => '   ']);
     assertApiError($blank, 422, 'VALIDATION_ERROR');
+
+    $withSpace = $this->withToken($token)->patchJson('/api/v1/auth/profile', ['name' => 'nabil kencana']);
+    assertApiError($withSpace, 422, 'VALIDATION_ERROR');
+    expect($withSpace->json('error.details.fields.name.0'))->toContain('spasi');
+
+    $leadingSpace = $this->withToken($token)->patchJson('/api/v1/auth/profile', ['name' => ' nabilkencana20 ']);
+    assertApiError($leadingSpace, 422, 'VALIDATION_ERROR');
+
+    $withCaps = $this->withToken($token)->patchJson('/api/v1/auth/profile', ['name' => 'Nabil']);
+    assertApiError($withCaps, 422, 'VALIDATION_ERROR');
+    expect($withCaps->json('error.details.fields.name.0'))->toContain('huruf kapital');
 });
 
 it('refuses a deactivated user on profile update', function () {
-    $user = User::factory()->create(['name' => 'Budi Awal']);
+    $user = User::factory()->create(['name' => 'budi_awal']);
     $token = $user->createToken('t')->plainTextToken;
     $user->update(['is_active' => false]);
 
-    assertApiError($this->withToken($token)->patchJson('/api/v1/auth/profile', ['name' => 'Valid Baru']), 401, 'UNAUTHENTICATED');
+    assertApiError($this->withToken($token)->patchJson('/api/v1/auth/profile', ['name' => 'valid_baru']), 401, 'UNAUTHENTICATED');
 });
