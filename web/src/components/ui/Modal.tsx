@@ -8,22 +8,25 @@ export function Modal({
   onOpenChange,
   title,
   description,
+  size = 'md',
   children,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: ReactNode
   description: ReactNode
+  size?: 'md' | 'lg'
   children: ReactNode
 }) {
   const focus = useReturnFocus()
+  const maxWidth = size === 'lg' ? 'max-w-3xl' : 'max-w-md'
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-black/30" />
         <Dialog.Content
           onCloseAutoFocus={focus.onCloseAutoFocus}
-          className="fixed top-[12vh] left-1/2 z-50 flex max-h-[76vh] w-[calc(100%-32px)] max-w-md -translate-x-1/2 flex-col rounded-md border bg-bg shadow-pop"
+          className={`fixed top-[10vh] left-1/2 z-50 flex max-h-[80vh] w-[calc(100%-32px)] ${maxWidth} -translate-x-1/2 flex-col rounded-md border bg-bg shadow-pop`}
         >
           <div className="flex items-start justify-between gap-3 border-b px-4 py-3">
             <div className="flex flex-col gap-0.5">

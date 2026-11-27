@@ -18,6 +18,10 @@ export const ACTIONS: Record<string, string> = {
   'auth.login': 'Masuk',
   'auth.register': 'Daftar akun',
   'auth.profile_updated': 'Profil diubah',
+  'import.started': 'Impor dimulai',
+  'import.completed': 'Impor selesai',
+  'import.failed': 'Impor gagal',
+  'import.cancelled': 'Impor dibatalkan',
 }
 
 type Change = { old: unknown; new: unknown }

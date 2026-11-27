@@ -17,6 +17,7 @@ import { Facts } from '../Merged'
 import { useWorkList, workKeys } from '../queries'
 import { RowActions } from '../RowActions'
 import { RowsTable, type Column } from '../RowsTable'
+import { ImportAction } from '../../imports/ImportAction'
 import { useDeactivate } from '../useDeactivate'
 import { useWrite } from '../useWrite'
 
@@ -54,10 +55,18 @@ export function PersonelPage() {
         query={list}
         primary={(writable) =>
           can('personel.create') ? (
-            <Button variant="primary" onClick={() => setEditing('new')} disabled={!writable}>
-              <Plus size={16} strokeWidth={1.5} aria-hidden />
-              Tambah personel
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <ImportAction
+                type="personel"
+                title="Personel"
+                disabled={!writable}
+                disabledReason="Konsol HR sedang tidak dapat ditulis."
+              />
+              <Button variant="primary" onClick={() => setEditing('new')} disabled={!writable}>
+                <Plus size={16} strokeWidth={1.5} aria-hidden />
+                Tambah personel
+              </Button>
+            </div>
           ) : null
         }
         emptyMessage="Belum ada personel. Tambahkan orang yang menjalankan alur distribusi, mis. kurir atau staf gudang."

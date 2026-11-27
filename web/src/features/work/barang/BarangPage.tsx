@@ -21,6 +21,7 @@ import { RefPicker } from '../pickers'
 import { useOptions, useWorkList, workKeys } from '../queries'
 import { RowActions } from '../RowActions'
 import { RowsTable, type Column } from '../RowsTable'
+import { ImportAction } from '../../imports/ImportAction'
 import { useDeactivate } from '../useDeactivate'
 import { useWrite } from '../useWrite'
 import { ExportAction } from '../../reports/ExportAction'
@@ -97,6 +98,12 @@ export function BarangPage() {
                   : 'Seluruh inventaris barang'
               }
               filters={{ q: url.get('q'), status: url.get('status'), kind: url.get('kind') }}
+            />
+            <ImportAction
+              type="barang"
+              title="Barang"
+              disabled={!writable}
+              disabledReason="Konsol Gudang sedang tidak dapat ditulis."
             />
             {can('barang.create') ? (
               <Button variant="primary" onClick={() => setEditing('new')} disabled={!writable}>

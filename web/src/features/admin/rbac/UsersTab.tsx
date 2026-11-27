@@ -16,6 +16,7 @@ import type { RbacRole, RbacUser } from '../../../lib/api/schemas'
 import { toApiError } from '../../../lib/api/client'
 import { describeError } from '../../../lib/errors'
 import { useAuth } from '../../auth/auth'
+import { ImportAction } from '../../imports/ImportAction'
 import { useCreateUser, useRbacRoles, useRbacUsers, useUpdateUser } from './queries'
 
 export function UsersTab() {
@@ -25,7 +26,8 @@ export function UsersTab() {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex justify-end">
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <ImportAction type="users" title="Pengguna" />
         <Button variant="primary" onClick={() => setAdding(true)} disabled={!roles.data}>
           <Plus size={16} strokeWidth={1.5} aria-hidden />
           Tambah pengguna

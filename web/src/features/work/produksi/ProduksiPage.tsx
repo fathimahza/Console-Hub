@@ -18,6 +18,7 @@ import { RefPicker } from '../pickers'
 import { useWorkList, workKeys } from '../queries'
 import { RowActions } from '../RowActions'
 import { RowsTable, type Column } from '../RowsTable'
+import { ImportAction } from '../../imports/ImportAction'
 import { useDeactivate } from '../useDeactivate'
 import { useWrite } from '../useWrite'
 
@@ -58,10 +59,18 @@ export function ProduksiPage() {
         query={list}
         primary={(writable) =>
           can('produksi.create') ? (
-            <Button variant="primary" onClick={() => setEditing('new')} disabled={!writable}>
-              <Plus size={16} strokeWidth={1.5} aria-hidden />
-              Tambah produksi
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <ImportAction
+                type="produksi"
+                title="Produksi"
+                disabled={!writable}
+                disabledReason="Konsol Produksi sedang tidak dapat ditulis."
+              />
+              <Button variant="primary" onClick={() => setEditing('new')} disabled={!writable}>
+                <Plus size={16} strokeWidth={1.5} aria-hidden />
+                Tambah produksi
+              </Button>
+            </div>
           ) : null
         }
         emptyMessage="Belum ada data produksi. Tambahkan area dan jenis produksi yang memasok gudang."
